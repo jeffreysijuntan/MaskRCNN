@@ -1,0 +1,12 @@
+jsonschema
+keras
+keras-resnet
+scikit-image
+
+[test]
+codecov
+mock
+pytest
+pytest-cov
+pytest-pep8
+pytest-runner
