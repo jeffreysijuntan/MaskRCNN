@@ -79,10 +79,13 @@ class DictionaryIterator(keras.preprocessing.image.Iterator):
         )
 
     def next(self):
-        with self.lock:
-            selection = next(self.index_generator)
+        x = None
+        while (x is None):
+            with self.lock:
+                selection = next(self.index_generator)
+            x = self._get_batches_of_transformed_samples(selection)
+         return x
 
-        return self._get_batches_of_transformed_samples(selection)
 
     def find_scale(self, image):
         r, c, _ = image.shape
@@ -198,11 +201,14 @@ class DictionaryIterator(keras.preprocessing.image.Iterator):
                 
                 target_bounding_boxes[batch_idx, bbox_idx] = target_bounding_box
                 target_masks[batch_idx, bbox_idx] = target_mask
-        
+
         target_bounding_boxes = target_bounding_boxes[numpy.newaxis,~numpy.all(target_bounding_boxes==0,axis=2)]
         target_masks = target_masks[~numpy.all(target_masks==0,axis=(2,3))]
         target_masks = numpy.expand_dims(target_masks, axis=0)
         
+        if (target_bounding_boxes.shape[1] == 0):
+            return None
+
         x = [
             target_bounding_boxes,
             target_categories,
