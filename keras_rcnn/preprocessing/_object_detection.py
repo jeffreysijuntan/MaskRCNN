@@ -198,7 +198,11 @@ class DictionaryIterator(keras.preprocessing.image.Iterator):
                 
                 target_bounding_boxes[batch_idx, bbox_idx] = target_bounding_box
                 target_masks[batch_idx, bbox_idx] = target_mask
-
+        
+        target_bounding_boxes = target_bounding_boxes[numpy.newaxis,~numpy.all(target_bounding_boxes==0,axis=2)]
+        target_masks = target_masks[~numpy.all(target_masks==0,axis=(2,3))]
+        target_masks = numpy.expand_dims(target_masks, axis=0)
+        
         x = [
             target_bounding_boxes,
             target_categories,
@@ -274,7 +278,7 @@ class ObjectDetectionGenerator:
             image = image.astype('float64')
             image -= numpy.mean(image,keepdims=True)
         
-        image = image.astype('float64')
+        #image = image.astype('float64')
         image = skimage.exposure.rescale_intensity(image, out_range=(0.0, 1.0))
 
         return image
